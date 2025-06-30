@@ -8,7 +8,7 @@ from utils import validation
 import os
 import numpy as np
 import random
-from WEMT import WEMT_NET
+from WMFormer import WMF_NET
 
 # --- Parse hyper-parameters  --- #
 parser = argparse.ArgumentParser(description='Hyper-parameters for network')
@@ -45,8 +45,7 @@ val_data_loader = DataLoader(ValData(val_data_dir,val_filename), batch_size=val_
 
 # --- Define the network --- #
 
-# net = Transweather()
-net = Transweather_base().to(device)
+net = WMF_NET().to(device)
 
 
 net = nn.DataParallel(net, device_ids=device_ids)
