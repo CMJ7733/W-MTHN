@@ -16,8 +16,7 @@ import numpy as np
 import random
 import json 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
-# from original_model import Transweather,Transweather_base  
-from WEMT import WEMT_NET
+from WMFormer import WMF_NET
 
 plt.switch_backend('agg')
 
@@ -44,10 +43,8 @@ val_batch_size = args.val_batch_size
 exp_name = args.exp_name
 num_epochs = args.num_epochs
 
-# 创建目录保存训练日志和图表
 os.makedirs(f"{exp_name}/plots", exist_ok=True)
 
-# 初始化数据结构记录训练过程
 training_history = {
     'train_loss': [],
     'smooth_loss': [],
@@ -104,8 +101,7 @@ device_ids = [Id for Id in range(torch.cuda.device_count())]
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # --- Define the network --- #
-net = Transweather_base()
-# net = WaveletTransformModule()
+net = WMF_NET()
 
 # --- Build optimizer --- #
 optimizer = torch.optim.AdamW(net.parameters(), lr=learning_rate, weight_decay=1e-4)
@@ -114,7 +110,6 @@ optimizer = torch.optim.AdamW(net.parameters(), lr=learning_rate, weight_decay=1
 net = net.to(device)
 net = nn.DataParallel(net, device_ids=device_ids)
 
-# --- 添加混合精度训练 --- #
 scaler = torch.cuda.amp.GradScaler()
 
 # --- Define the perceptual loss network --- #
@@ -155,7 +150,7 @@ def plot_training_history(history, exp_name):
     """绘制训练历史图表"""
     plt.figure(figsize=(15, 12))
     
-    # 1. 训练损失和验证PSNR对比
+    # 1. 
     plt.subplot(2, 2, 1)
     epochs = range(1, len(history['train_loss']) + 1)
     plt.plot(epochs, history['train_loss'], 'bo-', label='Training Loss')
@@ -164,7 +159,7 @@ def plot_training_history(history, exp_name):
     plt.xlabel('Epochs')
     plt.legend()
     
-    # 2. PSNR变化
+    # 2. PSNR
     plt.subplot(2, 2, 2)
     plt.plot(epochs, history['train_psnr'], 'g^-', label='Training PSNR')
     plt.plot(epochs, history['val_psnr'], 'r*-', label='Validation PSNR')
@@ -172,7 +167,7 @@ def plot_training_history(history, exp_name):
     plt.xlabel('Epochs')
     plt.legend()
     
-    # 3. 详细损失组成
+    # 3. LOSS
     plt.subplot(2, 2, 3)
     plt.plot(epochs, history['smooth_loss'], 'y--', label='Smooth Loss')
     plt.plot(epochs, history['perceptual_loss'], 'b--', label='Perceptual Loss')
@@ -181,7 +176,7 @@ def plot_training_history(history, exp_name):
     plt.xlabel('Epochs')
     plt.legend()
     
-    # 4. SSIM变化
+    # 4. SSIM
     plt.subplot(2, 2, 4)
     plt.plot(epochs, history['val_ssim'], 'm+-', label='Validation SSIM')
     plt.title('Validation SSIM')
@@ -208,19 +203,16 @@ for epoch in range(epoch_start, num_epochs):
 
         optimizer.zero_grad()
         
-        # 使用自动混合精度
         with torch.cuda.amp.autocast():
             pred_image = net(input_image)
             smooth_loss = F.smooth_l1_loss(pred_image, gt)
             perceptual_loss = loss_network(pred_image, gt)
             loss = smooth_loss + lambda_loss * perceptual_loss
 
-        # 反向传播和优化
         scaler.scale(loss).backward()
         scaler.step(optimizer)
         scaler.update()
 
-        # 记录loss和PSNR
         loss_list.append(loss.item())
         smooth_loss_list.append(smooth_loss.item())
         percep_loss_list.append(perceptual_loss.item())
@@ -229,51 +221,43 @@ for epoch in range(epoch_start, num_epochs):
         if batch_id % 100 == 0:
             print(f'Epoch: {epoch}, Iteration: {batch_id}, Loss: {loss.item():.4f}, Smooth Loss: {smooth_loss.item():.4f}, Percep Loss: {perceptual_loss.item():.4f}')
 
-    # 计算epoch的平均统计量
     train_psnr = sum(psnr_list) / len(psnr_list)
     avg_loss = sum(loss_list) / len(loss_list)
     avg_smooth_loss = sum(smooth_loss_list) / len(smooth_loss_list)
     avg_percep_loss = sum(percep_loss_list) / len(percep_loss_list)
     
     epoch_time = time.time() - start_time
-    
-    # 更新训练历史
+
     training_history['train_loss'].append(avg_loss)
     training_history['smooth_loss'].append(avg_smooth_loss)
     training_history['perceptual_loss'].append(avg_percep_loss)
     training_history['train_psnr'].append(train_psnr)
     training_history['epoch_times'].append(epoch_time)
-    
-    # 验证
+
     net.eval()
     val_psnr1, val_ssim1 = validation(net, val_data_loader1, device, exp_name)
     net.train()
     
     training_history['val_psnr'].append(val_psnr1)
     training_history['val_ssim'].append(val_ssim1)
-    
-    # 打印并保存日志
+
     print_log(epoch+1, num_epochs, epoch_time, train_psnr, val_psnr1, val_ssim1, exp_name)
-    
-    # 保存模型和训练历史
+
     torch.save(net.state_dict(), f'./{exp_name}/latest')
     if val_psnr1 >= old_val_psnr1:
         torch.save(net.state_dict(), f'./{exp_name}/best')
         print('Best model saved')
         old_val_psnr1 = val_psnr1
-    
-    # 每隔5个epoch或最后保存一次训练历史
+
     if epoch % 5 == 0 or epoch == num_epochs - 1:
         with open(f"{exp_name}/training_history.json", "w") as f:
             json.dump(training_history, f, indent=4)
         plot_training_history(training_history, exp_name)
-    
-    # 检查早停
+
     early_stopping(val_psnr1)
     if early_stopping.early_stop:
         print("Early stopping triggered at epoch", epoch)
         break
 
-# 训练完成后保存最终图表
 plot_training_history(training_history, exp_name)
 print("Training completed and history saved.")
