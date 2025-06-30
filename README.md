@@ -1,4 +1,4 @@
-# WEMT-NET
+# WMFormer:A Wavelet-Enhanced Mamba-Transformer Architecture for Image Deraining
 OUR CODE IS MAINLY BASED ON https://github.com/jeya-maria-jose/TransWeather.git
 
 ----
@@ -25,6 +25,7 @@ WEMT-Derain is a novel Transformer-based architecture that synergistically integ
 ## ⚙️ Installation
     ```bash
     conda env create -f environment.yml
+    conda activate WMFormer
 
 ----
 
@@ -46,7 +47,7 @@ WEMT-Derain is a novel Transformer-based architecture that synergistically integ
 
 ## Training Command
     ```bash
-    python train-individual.py -exp_name wemt \
+    python train-individual.py -exp_name wmf \
                 --train_batch_size 32 \
                 -epoch_start 0 \
                 -num_epochs 200
@@ -54,9 +55,9 @@ WEMT-Derain is a novel Transformer-based architecture that synergistically integ
 ## Evaluation
     ```bash
     #FOR Raindrop
-    ->  python test_raindrop.py -exp_name wemt
+    ->  python test_raindrop.py -exp_name wmf
     #FOR Rain100H
-    ->  python test_rain100H.py -exp_name wemt
+    ->  python test_rain100H.py -exp_name wmf
 
 
 
