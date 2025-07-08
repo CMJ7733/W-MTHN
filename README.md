@@ -1,10 +1,10 @@
-# WMFormer:A Wavelet-Enhanced Mamba-Transformer Architecture for Image Deraining
+# W-MTHN:Wavelet-Driven Mamba-Transformer Hybrid Network for Image Deraining
 OUR CODE IS MAINLY BASED ON https://github.com/jeya-maria-jose/TransWeather.git
 
 ----
 
 ## 🔍 Overview  
-WEMT-Derain is a novel Transformer-based architecture that synergistically integrates **wavelet preprocessing**, **hybrid Mamba-Transformer blocks**, and **direction-adaptive scanning** to achieve robust rain removal. Our key innovations include:  
+ W-MTHN is a novel Transformer-based architecture that synergistically integrates **wavelet preprocessing**, **hybrid Mamba-Transformer blocks**, and **direction-adaptive scanning** to achieve robust rain removal. Our key innovations include:  
 ✅ **Wavelet Preprocessor**: Enhances high-frequency details via multi-level DWT with adaptive gain control  
 ✅ **Hierarchical Encoder**: 2MLP + 2Mamba block design for optimal local-global feature extraction  
 ✅ **Spatial-Mamba Modules**: Direction-adaptive scanning (raster/vertical/spiral/reverse) for dynamic rain pattern modeling  
@@ -30,7 +30,7 @@ WEMT-Derain is a novel Transformer-based architecture that synergistically integ
 ----
 
 ## Dataset format
-    WEMT-NET
+    W-MTHN
     ├── data 
     |   ├── train # Training  
     |   |   ├── <dataset_name>   
