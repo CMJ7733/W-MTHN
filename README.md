@@ -10,7 +10,7 @@ OUR CODE IS MAINLY BASED ON https://github.com/jeya-maria-jose/TransWeather.git
 ✅ **Spatial-Mamba Modules**: Direction-adaptive scanning (raster/vertical/spiral/reverse) for dynamic rain pattern modeling  
 ✅ **Dynamic Cross-Attention**: Top-k gating for efficient cross-stage feature fusion  
 
-<img width="776" alt="12514301c4dc930eea19a5bc774c5d5" src="https://github.com/user-attachments/assets/fb55a1ed-1eb1-4c64-8314-14716961f0e9" />
+<img width="776" alt="0da22dfd08dea39a8c9d2f94ac88a31e" src="https://github.com/user-attachments/assets/c3b7e197-8ed3-4927-9ef5-97b316d83a9b" />
 
 ----
 
